@@ -1,0 +1,119 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: mail_postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - 'pgdata:/var/lib/postgresql/data'
+    networks:
+      - main
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_PASSWORD: "password"
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    container_name: mail_zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - 2181:2181
+    restart: always
+    networks:
+      - main
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    container_name: mail_kafka
+    hostname: kafka
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+    depends_on:
+      - zookeeper
+    restart: always
+    networks:
+      - main
+
+  rabbitmq:
+    container_name: mail_rabbitmq
+    image: "bitnami/rabbitmq:3.7"
+    ports:
+      - "4369:4369"
+      - "5672:5672"
+      - "25672:25672"
+      - "15672:15672"
+    volumes:
+      - "rabbitmq_data:/bitnami"
+    networks:
+      - main
+
+  celery-flower:
+    container_name: mail_flower
+    image: gregsi/latest-celery-flower-docker:latest
+    environment:
+      - AMQP_USERNAME=user
+      - AMQP_PASSWORD=bitnami
+      - AMQP_ADMIN_USERNAME=user
+      - AMQP_ADMIN_PASSWORD=bitnami
+      - AMQP_HOST=rabbitmq
+      - AMQP_PORT=5672
+      - AMQP_ADMIN_HOST=rabbitmq
+      - AMQP_ADMIN_PORT=15672
+      - FLOWER_BASIC_AUTH=user:test
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+      - worker
+    networks:
+      - main
+
+
+  worker:
+    build: .
+    container_name: mail_celery_worker
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ".:/code"
+    command: "celery -A core.celery worker --loglevel INFO -B --concurrency=4"
+    networks:
+      - main
+
+  web:
+    build: .
+    container_name: mail_web
+    depends_on:
+      - zookeeper
+      - kafka
+      - worker
+      - celery-flower
+      - rabbitmq
+      - postgres
+    volumes:
+      - ".:/code"
+    command: "uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - main
+
+networks:
+  main:
+
+volumes:
+  rabbitmq_data:
+  pgdata:
