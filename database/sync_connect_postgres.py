@@ -1,8 +1,13 @@
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from core.config import get_settings
+
+DATABASE_URL = get_settings().database_sync_url
+
+
 engine = create_engine(
-    "postgresql://postgres:postgres@postgres:5432/postgres",
+    DATABASE_URL,
     pool_pre_ping=True,
 )
 
