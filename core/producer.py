@@ -36,8 +36,8 @@ async def send_one():
             'type_event': random.choice(events),
             'send_type': random.choice(send_type),
             'parameters': {
-                'email': os.getenv('MY_EMAIL'),
-                'CHAT_ID': os.getenv('CHAT_ID'),
+                'email': 'testemail@gmail.com',
+                'CHAT_ID': 'test_chat',
                 'text': f'This is test text message {random.randrange(1, 100)}'
             }
         }
@@ -45,7 +45,7 @@ async def send_one():
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
-        await sleep(1)
+        await sleep(3)
 
 
 while True:
