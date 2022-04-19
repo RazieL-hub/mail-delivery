@@ -7,3 +7,10 @@ class UserSchema(BaseModel):
     telegram: str = Field(None, )
     viber: str = Field(None, )
     whats_app: str = Field(None, )
+
+
+class UserUpdateSchema(BaseModel):
+    email: EmailStr = None
+    telegram: str = Field(None, )
+    viber: str = Field(None, )
+    whats_app: str = Field(None, )

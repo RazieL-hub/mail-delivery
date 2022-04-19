@@ -29,24 +29,21 @@ async def send_one():
         bootstrap_servers='localhost:9093', value_serializer=json_serializer)
     # Get cluster layout and initial topic/partition leadership information
     await producer.start()
+
     try:
-        # Produce message
-        data = {
-            'action': random.choice(action),
-            'type_event': random.choice(events),
-            'send_type': random.choice(send_type),
-            'parameters': {
-                'email': 'testemail@gmail.com',
-                'CHAT_ID': 'test_chat',
-                'text': f'This is test text message {random.randrange(1, 100)}'
+            data = {
+                'action': random.choice(action),
+                'type_event': random.choice(events),
+                'send_type': random.choice(send_type),
+                'parameters': {
+                    'email': 'testemail@gmail.com',
+                    'CHAT_ID': 'test_chat',
+                    'text': f'This is test text message {random.randrange(1, 100)}'
+                }
             }
-        }
-        await producer.send_and_wait("test", data)
+            await producer.send_and_wait("test", data)
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
-        await sleep(3)
 
-
-while True:
-    asyncio.run(send_one())
+asyncio.run(send_one())

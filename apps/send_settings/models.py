@@ -13,7 +13,7 @@ class SendSetting(Base):
     id = Column(Integer, primary_key=True, index=True)
     type_event = Column(String(256), )
     instant_delivery = Column(Boolean, default=False)
-    periodic_time = Column(Integer, nullable=True)
+    periodic_time = Column(Integer, default=15)
     work_time_start = Column(TIME, )
     work_time_finish = Column(TIME, )
     user_id = Column(Integer, ForeignKey('users.user_id'))
