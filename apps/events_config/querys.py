@@ -20,3 +20,12 @@ update events_config set type_event = :type_event, instant_delivery = :instant_d
 work_time_start = :work_time_start, work_time_finish = :work_time_finish 
 where user_id = :user_id and type_event=:type_event
 """
+
+get_test_event_all = """
+select * from reports where status=:status
+"""
+
+update_all_task = """
+update reports set status = :new_status 
+where status=:old_status
+"""

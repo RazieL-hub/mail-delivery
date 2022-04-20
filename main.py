@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from api.v1 import v1_router
+from apps.events_config.querys import get_event_config_query
 from apps.report.schemas import ReportSchema
 from core.celery import celery_app
 from database.async_connect_postgres import Session
@@ -19,33 +20,24 @@ app = FastAPI()
 async def start_consumer():
     loop = asyncio.get_event_loop()
     while True:
-        consumer = aiokafka.AIOKafkaConsumer("test", loop=loop, bootstrap_servers="kafka:9092", )
+        consumer = aiokafka.AIOKafkaConsumer("test", loop=loop, bootstrap_servers="mail_kafka:9092", )
         await consumer.start()
         try:
             async for msg in consumer:
                 message = json.loads(msg.value)
                 async with Session() as db:
-                    query = text(create_task).bindparams(user_id=message['user_id'],
-                                                         type_event=message['type_event'],
-                                                         report_data=json.dumps(message['data']),
-                                                         date_created=datetime.datetime.now(),
-                                                         status=False)
-                    await db.execute(query)
-                    await db.commit()
-
-                # async with Session() as db:
-                #     query = text(create_task).bindparams(**ReportSchema().dict())
-                #     task = await db.execute(query)
-                #     await db.commit()
-                #     last_task = task.first()
-                #     message = json.loads(msg.value)
-                #     if message['send_type'] == 'email':
-                #         task_name = "core.celery.send_report_email"
-                #         celery_app.send_task(task_name, args=[last_task.id],
-                #                              eta=datetime.datetime.now() + datetime.timedelta(
-                #                                  seconds=random.randrange(2)))
-                #     elif message['send_type'] == 'telegram':
-                #         task_name = 'core.celery.send_report_telegram'
+                    query = text(get_event_config_query).bindparams(user_id=message['user_id'],
+                                                                    type_event=message['type_event'])
+                    cursor = await db.execute(query)
+                    event = cursor.fetchone()
+                    if event:
+                        query = text(create_task).bindparams(user_id=message['user_id'],
+                                                             type_event_id=event.id,
+                                                             report_data=json.dumps(message['data']),
+                                                             date_created=datetime.datetime.now(),
+                                                             status=False)
+                        await db.execute(query)
+                        await db.commit()
         except Exception as e:
             print(222, e)
         finally:
