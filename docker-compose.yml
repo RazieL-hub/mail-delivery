@@ -28,7 +28,7 @@ services:
 
   kafka:
     image: 'bitnami/kafka:latest'
-    container_name: kafka
+    container_name: mail_kafka
     ports:
       - 9092:9092
       - 9093:9093

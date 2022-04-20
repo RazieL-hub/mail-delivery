@@ -1,5 +1,3 @@
-import datetime
-
 import sqlalchemy
 
 from sqlalchemy import Column, Integer, String, TIME, ForeignKey, Boolean, DateTime
@@ -23,6 +21,7 @@ class EventConfig(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'))
 
     user = relationship('User', back_populates='config')
+    event_settings = relationship('EventConfig', back_populates='event_id')
 
     class Config:
         orm_mode = True

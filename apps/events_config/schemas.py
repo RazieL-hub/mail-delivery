@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class SendSettingsSchema(BaseModel):
+class EventSetting(BaseModel):
     type_event: str = Field(..., example='test event')
     instant_delivery: bool = Field(default=False, )
     periodic_time: int = Field(default=15, )
@@ -14,7 +14,7 @@ class SendSettingsSchema(BaseModel):
     user_id: int = Field(..., example=99)
 
 
-class SendSettingsUpdateSchema(BaseModel):
+class EventSettingUpdateSchema(BaseModel):
     type_event: str = Field(..., example='test event')
     instant_delivery: bool = Field(default=False, )
     periodic_time: int = Field(default=15, )
