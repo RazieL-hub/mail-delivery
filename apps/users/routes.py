@@ -11,9 +11,9 @@ router = APIRouter(prefix='/users')
 @router.post('/add')
 async def add_user(user: UserSchema, db: Session = Depends(get_session)):
     query = text(get_user_query).bindparams(user_id=user.user_id)
-    cursor = db.execute(query)
-    user = cursor.fetchone()
-    if user:
+    cursor = await db.execute(query)
+    check_user = cursor.fetchone()
+    if check_user:
         raise HTTPException(status_code=404, detail=f"User with id = {user.user_id} already exists")
     query = text(add_user_query).bindparams(**user.dict())
     await db.execute(query)

@@ -16,7 +16,9 @@ class User(Base):
     viber = Column(String(256), unique=True, nullable=True)
     whats_app = Column(String(256), unique=True, nullable=True)
 
-    settings = relationship('SendSetting', back_populates='user')
+    config = relationship('EventConfig', back_populates='user')
+
+    user_reports = relationship('Report', back_populates='users')
 
     class Config:
         orm_mode = True

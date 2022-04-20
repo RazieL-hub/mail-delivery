@@ -7,8 +7,8 @@ select * from send_settings where user_id=:user_id and type_event=:type_event
 """
 
 add_settings_for_user_query = """
-insert into send_settings(type_event, instant_delivery, periodic_time, work_time_start, work_time_finish, user_id)
-values (:type_event, :instant_delivery, :periodic_time, :work_time_start, :work_time_finish, :user_id)
+insert into send_settings(type_event, instant_delivery, periodic_time, work_time_start, work_time_finish, user_id, last_send)
+values (:type_event, :instant_delivery, :periodic_time, :work_time_start, :work_time_finish, :user_id, :last_send)
 """
 
 delete_settings_query = """

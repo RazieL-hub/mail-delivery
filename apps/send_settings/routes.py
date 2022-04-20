@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 from starlette.responses import JSONResponse
@@ -11,11 +13,11 @@ from database.async_connect_postgres import Session, get_session
 router = APIRouter(prefix='/settings_for_users')
 
 
-@router.get('/{user_id}', response_model=SendSettingsSchema)
+@router.get('/{user_id}', response_model=List[SendSettingsSchema])
 async def get_list_user_settings(user_id: int, db: Session = Depends(get_session)):
     query = text(get_list_send_settings_query).bindparams(user_id=user_id)
     cursor = await db.execute(query)
-    user_settings = cursor.fetchone()
+    user_settings = cursor.fetchall()
     if not user_settings:
         raise HTTPException(status_code=404, detail=f"Setting for user with id = {user_id} not found")
     return user_settings
@@ -58,7 +60,7 @@ async def delete_settings_for_user(user_id: int, type_event: str, db: Session = 
     user_settings = cursor.fetchone()
     if not user_settings:
         raise HTTPException(status_code=404, detail=f"Settings for user {user_id} not found")
-    query = text(delete_settings_query).bindparams(user_id=user_id)
+    query = text(delete_settings_query).bindparams(user_id=user_id, type_event=type_event)
     await db.execute(query)
     await db.commit()
     return JSONResponse(status_code=200, content={'msg': f'settings for user with id = {user_id} was deleted'})
