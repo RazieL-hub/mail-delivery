@@ -14,36 +14,29 @@ def json_serializer(data):
     return json.dumps(data).encode('utf-8')
 
 
-events = ['эксплуатационный мониторинг состояний приборов учета',
-          'эксплуатационный мониторинг состояний УСПД и УКПКЭ',
-          'эксплуатационный мониторинг состояний каналов связи',
-          'эксплуатационный мониторинг состояний программного и аппаратного обеспечения',
-          'регистрация', 'обработка критических событий']
-action = ['sent', 'create_event']
-
-send_type = ['email', 'telegram', 'viber', 'what\'s app', 'odnoklassniki']
+events = ['test 1', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6']
+send_type = ['email', 'telegram', ]
 
 
 async def send_one():
-    producer = AIOKafkaProducer(
-        bootstrap_servers='localhost:9093', value_serializer=json_serializer)
+    producer = AIOKafkaProducer(bootstrap_servers='localhost:9093', value_serializer=json_serializer)
     # Get cluster layout and initial topic/partition leadership information
     await producer.start()
-
     try:
-            data = {
-                'action': random.choice(action),
-                'type_event': random.choice(events),
-                'send_type': random.choice(send_type),
-                'parameters': {
-                    'email': 'testemail@gmail.com',
-                    'CHAT_ID': 'test_chat',
-                    'text': f'This is test text message {random.randrange(1, 100)}'
-                }
+        data = {
+            "user_id": 99,
+            "type_event": random.choice(events),
+            "data": {
+                "text": f"Some text {random.randint(1, 100)}",
+                "payload": f"some payload ......................."
             }
-            await producer.send_and_wait("test", data)
+        }
+        await producer.send_and_wait("test", data)
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
+        await sleep(3)
 
-asyncio.run(send_one())
+
+while True:
+    asyncio.run(send_one())
