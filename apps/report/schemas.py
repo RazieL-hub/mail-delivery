@@ -9,4 +9,5 @@ class ReportSchema(BaseModel):
     type_event: str
     report_data: Json
     date_time: datetime = Field(..., example=datetime.now())
-    status: bool = False
+    status_send: bool = False
+    prepare_message: bool = False

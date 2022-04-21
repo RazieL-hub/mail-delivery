@@ -14,9 +14,7 @@ def json_serializer(data):
     return json.dumps(data).encode('utf-8')
 
 
-events = ['test 1', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6']
-send_type = ['email', 'telegram', ]
-
+events = ['test event 1', 'test event 2', 'test event 3', 'test event 4', 'test event 5', 'test event 6']
 
 async def send_one():
     producer = AIOKafkaProducer(bootstrap_servers='localhost:9093', value_serializer=json_serializer)
@@ -24,7 +22,7 @@ async def send_one():
     await producer.start()
     try:
         data = {
-            "user_id": 99,
+            "user_id": random.randint(1, 4),
             "type_event": random.choice(events),
             "data": {
                 "text": f"Some text {random.randint(1, 100)}",
@@ -35,7 +33,7 @@ async def send_one():
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
-        await sleep(3)
+        await sleep(7)
 
 
 while True:

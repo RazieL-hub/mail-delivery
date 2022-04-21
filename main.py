@@ -35,7 +35,8 @@ async def start_consumer():
                                                              type_event_id=event.id,
                                                              report_data=json.dumps(message['data']),
                                                              date_created=datetime.datetime.now(),
-                                                             status=False)
+                                                             prepare_message=False,
+                                                             status_send=False)
                         await db.execute(query)
                         await db.commit()
         except Exception as e:

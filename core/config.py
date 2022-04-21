@@ -27,6 +27,8 @@ conf = ConnectionConfig(
 class Settings(BaseSettings):
     database_async_url: str
     database_sync_url: str
+    bot_token: str
+    chat_id: str
 
     class Config:
         env_file = ".env"

@@ -1,6 +1,9 @@
 start:
 	uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
+am:
+	alembic init -t async migrations
+
 mkm:
 	docker exec -it mail_web alembic revision --autogenerate
 
