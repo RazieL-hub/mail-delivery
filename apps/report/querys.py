@@ -25,3 +25,9 @@ where prepare_message=True
 group by user_id, type_event_id
 """
 
+get_one_report = """
+select report_data from reports where prepare_message=True
+and type_event_id = :type_event_id
+and user_id = :user_id
+and status_send 
+"""
