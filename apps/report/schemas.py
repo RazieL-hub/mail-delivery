@@ -10,4 +10,3 @@ class ReportSchema(BaseModel):
     report_data: Json
     date_time: datetime = Field(..., example=datetime.now())
     status_send: bool = False
-    prepare_message: bool = False
