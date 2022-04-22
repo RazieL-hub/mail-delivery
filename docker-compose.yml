@@ -88,7 +88,7 @@ services:
       - rabbitmq
     volumes:
       - ".:/code"
-    command: "celery -A core.celery worker --loglevel INFO -B --concurrency=4"
+    command: "celery -A core.celery worker --loglevel INFO -B --concurrency=6"
     networks:
       - main
 
