@@ -34,7 +34,8 @@ where status_send=:old_status
 """
 
 get_type_event_and_last_send = """
-select type_event, last_send, periodic_time, work_time_start, work_time_finish from events_config where id = :type_event_id
+select type_event, last_send, periodic_time, work_time_start, work_time_finish, user_id
+from events_config where id = :type_event_id
 """
 
 update_last_send = """
