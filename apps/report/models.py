@@ -15,7 +15,6 @@ class Report(Base):
     report_data = Column(JSONB, )
     date_created = Column(DateTime, server_default=now())
     status_send = Column(Boolean, default=False)
-    prepare_message = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey('users.user_id'))
     type_event_id = Column(Integer, ForeignKey('events_config.id'))
 
