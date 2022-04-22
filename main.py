@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 import json
-import random
 
 import aiokafka
 from fastapi import FastAPI
@@ -9,10 +8,8 @@ from sqlalchemy import text
 
 from api.v1 import v1_router
 from apps.events_config.querys import get_event_config_query
-from apps.report.schemas import ReportSchema
-from core.celery import celery_app
 from database.async_connect_postgres import Session
-from apps.report.querys import create_task, get_task_query
+from apps.report.querys import create_task
 
 app = FastAPI()
 
@@ -42,8 +39,6 @@ async def start_consumer():
             print(222, e)
         finally:
             await consumer.stop()
-            with open(file='finish_test.txt', mode='w') as file:
-                file.write(str(datetime.datetime.now()))
 
 
 @app.on_event("startup")

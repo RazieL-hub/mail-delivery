@@ -33,7 +33,7 @@ async def send_one():
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
-        await sleep(3)
+        await sleep(0.5)
 
 
 while True:
