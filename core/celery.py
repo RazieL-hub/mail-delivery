@@ -1,4 +1,6 @@
+import random
 from datetime import datetime, timedelta
+
 
 import httpx
 from celery import Celery
@@ -12,15 +14,23 @@ from core.config import get_settings
 from database.sync_connect_postgres import SessionLocal
 from apps.report.querys import update_task_status, count_messages_for_user_and_event, \
     all_reports_status_false, select_report
-
+chats = ['676714498', '1046023028', '662122625', '882510809', '-1001576623026']
 token = get_settings().bot_token
 chat_id = get_settings().chat_id
 payload = "https://www.xeroxscanners.com/downloads/Manuals/XMSSD/PDF_Converter_Pro_Quick_Reference_Guide.RU.pdf"
 api_telegram = f"https://api.telegram.org/bot{token}"
-message_url = f"{api_telegram}/sendMessage?chat_id={chat_id}&text="
+message_url = f"{api_telegram}/sendMessage?chat_id={random.choice(chats)}&text="
 celery_app = Celery("worker", backend="rpc://user:bitnami@rabbitmq:5672//",
                     broker="amqp://user:bitnami@rabbitmq:5672//")
-celery_app.conf.update(task_track_started=True)
+# celery_app.conf.update(task_track_started=True)
+celery_app.conf.ONCE = {
+    'backend': 'celery_once.backends.File',
+    'settings': {
+        'location': '/tmp/celery_once',
+        'default_timeout': 60 * 60
+    }
+}
+
 
 
 @celery_app.on_after_configure.connect
@@ -77,27 +87,39 @@ def send_group_message(self, type_event_id: int, user_id: int, reports_id: tuple
             db.commit()
 
 
-@celery_app.task(name='send_briefing_message', bind=True, max_retries=5, retry_jitter=True)
+@celery_app.task(name='send_briefing_message', bind=True, max_retries=5)
 def send_briefing_message(self, type_event_id: int, user_id: int, reports_id: tuple, count_messages: int,
                           date_start: datetime, date_finish: datetime):
+    print(datetime.now().time())
+    print(datetime.now().time())
+    print(datetime.now().time())
+    print(datetime.now().time())
+    print(datetime.now().time())
+    print(datetime.now().time())
     with SessionLocal() as db:
         cursor = db.execute(text(get_type_event_and_last_send).bindparams(type_event_id=type_event_id))
         event = cursor.fetchone()
         if (datetime.now() - event[1]) > timedelta(minutes=event[2]) \
                 and (event[3] < datetime.now().time() < event[4]):
-            res_text = httpx.post(f"{message_url}Сообщений по типу событий {event[0]} с {date_start} по "
-                                  f"{date_finish} для пользователя {event[5]} было {count_messages}. "
-                                  f"Иди смотри журнал")
-            print(f"STATUS CODE send_briefing_message TEXT {res_text.status_code}")
-            db.execute(text(update_task_status).bindparams(user_id=user_id,
-                                                           type_event_id=type_event_id,
-                                                           reports_id=tuple(reports_id)))
-            db.execute(text(update_last_send).bindparams(type_event_id=type_event_id, date_time=datetime.now()))
-        db.commit()
+                res_text = httpx.post(f"{api_telegram}/sendMessage?chat_id={random.choice(chats)}"
+                                      f"&text=Сообщений по типу событий {event[0]} с {date_start} по "
+                                      f"{date_finish} для пользователя {event[5]} было {count_messages}. "
+                                      f"Иди смотри журнал", timeout=10)
+                print(f"STATUS CODE send_briefing_message TEXT {res_text.status_code}")
+                db.execute(text(update_task_status).bindparams(user_id=user_id,
+                                                               type_event_id=type_event_id,
+                                                               reports_id=tuple(reports_id)))
+                db.commit()
+                print(f"FINISH   {datetime.now().time()}")
+                print(f"FINISH   {datetime.now().time()}")
+                print(f"FINISH   {datetime.now().time()}")
+                print(f"FINISH   {datetime.now().time()}")
+                # db.execute(text(update_last_send).bindparams(type_event_id=type_event_id, date_time=datetime.now()))
 
 
 @celery_app.task()
 def send_report_telegram():
+
     with SessionLocal() as db:
         cursor = db.execute(all_reports_status_false)
         reports_id = cursor.fetchall()
@@ -113,4 +135,3 @@ def send_report_telegram():
             if row[2] > 9:
                 send_briefing_message.delay(type_event_id=row[1], user_id=row[0], reports_id=reports_id,
                                             count_messages=row[2], date_start=row[3], date_finish=row[4])
-        db.commit()
