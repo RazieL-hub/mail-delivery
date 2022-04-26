@@ -39,5 +39,6 @@ from events_config where id = :type_event_id
 """
 
 update_last_send = """
-update events_config set last_send=:date_time where id = :type_event_id
+update events_config set last_send=:date_time 
+where id = :type_event_id
 """
