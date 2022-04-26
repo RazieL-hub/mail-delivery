@@ -22,7 +22,7 @@ async def send_one():
     await producer.start()
     try:
         data = {
-            "user_id": random.randint(1, 4),
+            "user_id": random.randint(1, 51),
             "type_event": random.choice(events),
             "data": {
                 "text": f"Some text {random.randint(1, 100)}",
@@ -33,8 +33,6 @@ async def send_one():
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
-        await sleep(0.5)
-
 
 while True:
     asyncio.run(send_one())
